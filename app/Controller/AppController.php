@@ -38,6 +38,7 @@ class AppController extends Controller {
    	function beforeFilter(){  	  	
    		$admin = Configure::read('Routing.prefixes');
 		$curPrefix=$this->params['prefix'];
+		
    		
    		if(isset($this->params[$admin[0]]) && $curPrefix=='admin') {   
 			/*-- Auth configration for admin user-- */
@@ -76,15 +77,15 @@ class AppController extends Controller {
 
 		}else{ 		
 			/*--auth configration for frontend user--*/
-			$this->Auth->loginRedirect=array('controller'=>'customers','action'=>'profile','admin' => false);
+			$this->Auth->loginRedirect=array('controller'=>'home','action'=>'index','admin' => false);
 			$this->Auth->logoutRedirect=array('controller'=>'home','action'=>'index','admin' => false);
-	 		$this->Auth->loginAction = array('controller' => 'customers', 'action' => 'index','admin' => false);       
+	 		$this->Auth->loginAction = array('controller' => 'logins', 'action' => 'login','admin' => false);       
 			$this->Auth->authError='Access denied! Please login to access the resource.';
 			$this->Auth->authenticate = array(
 				'Form' => array(
 					'userModel' => 'Login',
-					'fields' => array('username' => 'email','password' => 'password'),
-					'scope' => array('user_status' =>'Active','user_role_id'=>3)
+					'fields' => array('email' => 'email','password' => 'password'),
+					'scope' => array('user_status' =>1,'user_role_id'=>3)
 				)
 			); 
 	         			
