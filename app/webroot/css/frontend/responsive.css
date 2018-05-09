@@ -1,0 +1,101 @@
+@media (min-width: 992px) and (max-width: 1100px) {
+    footer p{ font-size: 21px;}	
+    header .nhs{ margin: -5px 0 0;}
+    
+    .whitebox p{ margin: 7px 0;}
+    .infopage h4{ font-size: 25px;}
+    .infopage .alphabets li{ width: 2.85%;}
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    header{ padding: 20px 0 15px;}
+    header .nhs{ margin: -10px 0 0;}
+    header p{ font-size: 20px; line-height: 30px; margin: 0;}
+    .bluebanner span{ font-size: 16px; line-height: 20px; margin: 10px 0 0;}
+    
+    .bluebanner{ padding: 50px 0 0;}
+    .bluebanner .col-lg-2{ margin: 0 -2px 30px;}
+    .page-title{ padding: 20px 0;}
+    footer{ padding: 30px 0;}
+    footer p{ font-size: 15px; line-height: 20px; margin: 6px 0 0;}
+    
+    .whitebox a{ margin: 0 5px;}
+    .whitebox a img{ max-width: 100%;}
+    .whitebox p{ font-size: 18px; line-height: 26px; margin: 0;}
+    .home-title{ font-size: 25px; margin: 30px 0;}
+    .welcome_content p{ font-size: 16px; line-height: 20px; margin-bottom: 10px;}
+    .welcome_content{ margin-bottom: 25px;}
+    .welcome_content .col-md-4 img{ margin-right: 10px; width: 60px;}
+    .welcome_content .col-md-4 p{ calc(100% - 75px);}
+    p.hightlight{ font-size: 16px; line-height: 22px;}
+    .contact-details ul li img{ margin-right: 5px; width: 25px;}
+    .infopage h4{ font-size: 20px; margin-bottom: 25px;}
+    .infopage .alphabets li{ width: 2.6%;}
+    .blue_box{ padding: 15px;}
+    .cqc-accordian .panel-body img{ margin: 0 15px 0 0;}
+}
+
+@media (max-width: 767px){
+    header{ padding: 10px 0;}
+    header .text-right{ text-align: center}
+    header .text-right img{ width: 50px;}
+    header .nhs{ margin: 5px 0 0;}
+    header p{ font-size: 18px; line-height: 24px;}
+    .bluebanner{ padding: 20px 0 0;}
+    .bluebanner span{ font-size: 14px; margin: 8px 0 0; line-height: 18px;}
+    .bluebanner .col-lg-2{ margin: 0 -2px 15px;}
+    .bluebanner .col-lg-2 img{ width: 80px;}
+    .page-title{ padding: 10px 0; margin: 0 15px 20px;}
+    .page-title h1{ font-size: 25px;}
+    .page-title .form-control{ width: 100%; margin: 10px 0;}
+    footer{ padding: 15px 0; margin-top: 15px; text-align: center}
+    footer p{ font-size: 20px; line-height: 25px;}
+    footer .text-right{ text-align: center}
+    footer .sigma{ margin: 20px 0 0;}
+    footer span{ padding: 10px 0 0;}
+    
+    .whitebox{ padding: 10px 15px; margin: 0 0 10px;}
+    .whitebox p{ font-size: 15px; line-height: 22px; margin: 0;}
+    .whitebox a img{ max-width: 100%;}
+    .whitebox div a:first-child{ margin-bottom: 15px;}
+    .home-title{ font-size: 20px; line-height: 28px; margin: 20px 0;}
+    .ptitle{ margin-bottom: 15px;}
+    .welcome_content p{ font-size: 14px; line-height: 20px;}
+    .welcome_content{ margin-bottom: 25px;}
+    .welcome_content .col-md-4 img{ margin-right: 10px; width: 50px;}
+    .welcome_content .col-md-4{ margin-bottom: 0;}
+    p.hightlight{ font-size: 14px; line-height: 20px;}
+    .writer{ margin-bottom: 0;}
+    
+    .mapsection{ margin-bottom: 15px;}
+    .contact-details .tagline{ font-size: 15px; line-height: 20px;}
+    .contact-details address{ margin: 15px 0;}
+    .contact-details ul li{ padding: 5px 0;}
+    .cqc-accordian .panel-body img{ display: block; float: none; margin: 0 0 10px;}
+    .contact-details{ margin: 0 0 20px;}
+    .consultant-content .bg-success{ font-size: 17px; line-height: 20px;}
+    .contact-details.sidebar{ margin: 20px 0 0;}
+    
+    .infopage h4{ font-size: 16px; line-height: 20px; margin-bottom: 20px;}
+    .infopage .alphabets{ margin: 10px 0;}
+    .infopage .alphabets li{ margin: 0 2px 5px; width: 4%;}
+    .infolist_details li{ margin: 0; width: 100%;}
+    .infolist_details li a{ padding: 5px 0;}
+    .pro-control{ margin: 0 0 20px;}
+    .cqc-accordian.services .nav-tabs li{ margin-right: 3px;}
+    .cqc-accordian.services .nav-tabs{ margin: 0 0 15px;}
+    .cqc-accordian.services p em{ font-size: 15px; line-height: 20px; margin-bottom: 10px;}
+    .cqc-accordian.services .listing li{ padding: 5px 0;}
+    .cqc-accordian.services #info .col-md-6{ margin-bottom: 20px;}
+    .welcomeabout h2{ margin: 10px 0; font-size: 20px;}
+    .cqc-accordian .panel-heading a{ font-size: 14px;}
+    
+    .cqc-accordian.features  .panel-body img{ display: inline-block; float: left; margin: 0 10px 0 0;}
+    .why_pc li{ margin-bottom: 15px;}
+    .why_pc li img{ margin: 0 10px 0 0;}
+    .why_pc li p{ margin-bottom: 10px;}
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+	
+}

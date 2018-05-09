@@ -1,0 +1,25 @@
+.admin-login{
+	margin-top:10%;
+}
+.img_crop img{height: 200px;
+width: 200px;}
+#ProfileUpload .modal-dialog{width: 900px;}
+#ProfileUpload .modal-body{min-height: 100px;}
+.update-img > a {
+  float: left;
+  height: 70px;
+  width: 70px;
+}
+.update-img img.user-image{height: auto;
+width: 100%;}
+.update-img{position: relative;
+top: -65%;margin-bottom: 1%;}
+.welcome{
+	height: 350px;
+    text-align: center;
+    font-size: 30px;
+    line-height: 35px;
+    text-decoration: blink;
+    text-transform: uppercase;
+	padding:15% 0px;
+}
