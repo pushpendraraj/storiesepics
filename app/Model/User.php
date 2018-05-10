@@ -36,7 +36,7 @@ class User extends AppModel {
 		),
 		'full_name' => array(
 			'rule' => 'notEmpty',
-			'message' => 'Please enter the first name',
+			'message' => 'Please enter the full name',
 		)
 	);
 	
