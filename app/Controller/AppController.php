@@ -57,34 +57,17 @@ class AppController extends Controller {
        		$this->Auth->authorize = array('Controller');		       					
 			/*-- Auth configration for admin user --*/
   		
-  		}elseif(isset($this->params[$admin[1]]) && $curPrefix=='practitioner'){  
-
-			/*-- Auth configration for practitioner user-- */ 
-			$this->Auth->loginRedirect=array('controller'=>'home','action'=>'practitioner_index','practitioner' => true);
-			$this->Auth->logoutRedirect=array('controller'=>'logins','action'=>'practitioner_login','practitioner' => true);
-			$this->Auth->loginAction = array('controller' => 'logins', 'action' => 'practitioner_login','practitioner' => true);       
+  		}else{
+  		
+			/*--auth configration for frontend user--*/
+			$this->Auth->loginRedirect=array('controller'=>'home','action'=>'index','admin' => false);
+			$this->Auth->logoutRedirect=array('controller'=>'home','action'=>'index','admin' => false);
+	 		$this->Auth->loginAction = array('controller' => 'Webservice', 'action' => 'login','admin' => false);       
 			$this->Auth->authError='Access denied! Please login to access the resource.';
 			$this->Auth->authenticate = array(
 				'Form' => array(
 					'userModel' => 'Login',
 					'fields' => array('username' => 'email','password' => 'password'),
-					'scope' => array('user_status' =>'Active','user_role_id'=>2)
-				)
-			); 
-		  
-			$this->Auth->authorize = array('Controller');                   
-			/*-- auth configration for practitioner user--*/
-
-		}else{ 		
-			/*--auth configration for frontend user--*/
-			$this->Auth->loginRedirect=array('controller'=>'home','action'=>'index','admin' => false);
-			$this->Auth->logoutRedirect=array('controller'=>'home','action'=>'index','admin' => false);
-	 		$this->Auth->loginAction = array('controller' => 'logins', 'action' => 'login','admin' => false);       
-			$this->Auth->authError='Access denied! Please login to access the resource.';
-			$this->Auth->authenticate = array(
-				'Form' => array(
-					'userModel' => 'Login',
-					'fields' => array('email' => 'email','password' => 'password'),
 					'scope' => array('user_status' =>1,'user_role_id'=>3)
 				)
 			); 

@@ -5,23 +5,25 @@ class WebserviceController extends AppController {
 	public $helpers = array('Form', 'Html', 'Js');
 	public $paginate = array('limit' =>10);	
 	public $uses=array('User','Login');
-	public $components = array('Auth', 'Session');	
+	public $components = array('Auth', 'Session', 'Core', 'Email');	
 	static $errors = array( 
 		'invalidEmailPassword' => 'Invalid Email or Password.',
 		'emptyEmailPassword' => 'Email & Password should not be empty.',
-		'invalidEmail' => 'Invalid Email Address.'
+		'invalidEmail' => 'Invalid Email Address.',
+		'loginSuccess' => 'User logged in successfully.'
 	);
 
 	function beforeFilter(){
 		parent::beforeFilter();
-		$this->Auth->allow('get_users', 'login');
+		$this->Auth->allow('get_users', 'login' );
 	}
 
 	function get_users() {
 		$this->autoRender = false;
 		$this->layout = false;
 		$users = $this->User->find('all',array('conditions'=>array(
-			'User.user_status'=>1
+			'User.user_status'=>1,
+			'User.user_role_id'=>3
 		)));
 		echo json_encode($users);
 	}
@@ -37,21 +39,19 @@ class WebserviceController extends AppController {
 		$this->autoRender = false;
 		$this->layout = false;
 		$isLogin = false;
-		$userData = $this->request->data;
-
+		
 		if(!empty($this->request->data)){
 			$email  = $this->request->data['email'];
 			$password  = $this->request->data['password'];
 			$user_status = 1;
 			$user_role_id = 3;
-			$userData = array(
+			$this->request->data = array(
 				'Login'=>array(
-					'email'=>$email,
-					'password'=>$password,
-					// 'user_status'=>$user_status,
-					// 'user_role_id'=>$user_role_id
+					'email'=>trim($email),
+					'password'=>trim($password)
 				)
 			);
+			$this->Login->set($this->request->data);
 			
 			if(!$this->Login->validates(array('fieldList'=>array('email')))){
 				$errors = $this->Login->validationErrors;
@@ -61,7 +61,7 @@ class WebserviceController extends AppController {
 				$errors = $this->Login->validationErrors;
 				$msg = $errors['password'][0];
 				$resData = array();
-			}else if($this->Auth->login($userData)){ 
+			}else if($this->Auth->login()){ 
 			 	/*--update access logs--*/
 			 	$this->User->validation=null;
 
@@ -71,18 +71,14 @@ class WebserviceController extends AppController {
 						'last_login_date'=>date('Y-m-d H:i:s')
 				));
 
-				print_r($this->Auth->user);
-				die;
-
 				$this->User->id=$this->Auth->user('user_id');
 				$this->User->save($arrData,false);
 				/*--update access logs--*/				
 			 			 	 
 				$isLogin = true;
-				$msg = 'Data posted :)';
-				$resData = $userData;
+				$msg = self::$errors['loginSuccess']; 
+				$resData = $this->Auth->user();
 			}else{
-				// print_r($userData);
 				$msg = self::$errors['invalidEmailPassword'];
 				$resData = array();
 			}
