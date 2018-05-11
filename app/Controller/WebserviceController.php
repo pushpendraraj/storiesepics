@@ -4,7 +4,7 @@ class WebserviceController extends AppController {
 	public $name = 'Webservice';
 	public $helpers = array('Form', 'Html', 'Js');
 	public $paginate = array('limit' =>10);	
-	public $uses=array('User','Login');
+	public $uses=array('User', 'Login', 'Content', 'UserFriend');
 	public $components = array('Auth', 'Session', 'Core', 'Email');	
 	static $errors = array( 
 		'invalidEmailPassword' => 'Invalid Email or Password.',
@@ -20,14 +20,16 @@ class WebserviceController extends AppController {
 		'profileImgUpdateSuccess' => 'Image updated successfully.',
 		'profileImgUpdateFail' => 'Image not updated.',
 		'listFound' => 'Record found.',
-		'listNotFound' => 'Record not found.'
+		'listNotFound' => 'Record not found.',
+		'friendAddSuccess' => 'Friends added successfully.',
+		'operationFail' => 'Operation fail, please try again later.'
 	);
 
 	function beforeFilter(){
 		$this->autoRender = false;
 		$this->layout = false;
 		parent::beforeFilter();
-		$this->Auth->allow('login', 'logout', 'register');
+		$this->Auth->allow('login', 'logout', 'register', 'get_page_info', 'get_friends');
 	}
 
 	/*
@@ -47,6 +49,11 @@ class WebserviceController extends AppController {
 		if(!empty($users)){
 			$msg = self::$errors['listFound'];
 			$foundRecord = true;
+			$newList = array();
+			foreach($users as $user):
+				$newList[] = $user['User'];
+			endforeach;
+			$users = $newList;
 		}else{
 			$msg = self::$errors['listNotFound'];
 		}
@@ -169,7 +176,7 @@ class WebserviceController extends AppController {
 				if($userData = $this->User->save($this->request->data)) {
 					$msg =  self::$errors['registerSuccess'];
 					$isRegister = true;
-					$resData = $userData;
+					$resData = $userData['User'];
 				} else {
 					$msg =  self::$errors['registerFail'];
 					$isRegister = false;
@@ -240,7 +247,7 @@ class WebserviceController extends AppController {
 				if($userData = $this->User->save($this->request->data)) {
 					$msg =  self::$errors['updateSuccess'];
 					$isUpdate = true;
-					$resData = $userData;
+					$resData = $userData['User'];
 				} else {
 					$msg =  self::$errors['updateFail'];
 					$isUpdate = false;
@@ -269,14 +276,13 @@ class WebserviceController extends AppController {
 		$isUpdate = false;
 		$msg = '';
 		$resData = array();
-		// print_r($this->request->data);
-		// print_r($this->request->file);
 		if (!empty($this->request->data) && $this->request->is('post')) {
 			$userId=$this->Auth->user('user_id');
 			$imageData = $this->request->data['profile_pic'];
 			unset($this->request->data['profile_pic']);
 			list($type, $imageData) = explode(';', $imageData);
 			list(, $imageData)      = explode(',', $imageData);
+			
 			$imageData = base64_decode($imageData);
 			$filename = time().'.png';
 			file_put_contents(getcwd().'/img/admin/user/thumb/'.$filename, $imageData);
@@ -285,7 +291,7 @@ class WebserviceController extends AppController {
 			if($userData = $this->User->save($this->request->data)){
 				$msg =  self::$errors['profileImgUpdateSuccess'];
 				$isUpdate = true;
-				$resData = $userData;
+				$resData = '/img/admin/user/thumb/'.$filename;
 			}else{
 				$msg =  self::$errors['profileImgUpdateSuccess'];
 				$isUpdate = false;
@@ -344,6 +350,7 @@ class WebserviceController extends AppController {
 		if(!empty($user)){
 			$msg = self::$errors['listFound'];
 			$foundRecord = true;
+			$user = $user['User'];
 		}else{
 			$msg = self::$errors['listNotFound'];
 		}
@@ -352,6 +359,119 @@ class WebserviceController extends AppController {
 			'isSuccess'=>$foundRecord,
 			'msg'=>$msg,
 			'data'=>$user
+		);
+
+		echo json_encode($response);
+	}
+
+	/*
+	* Function for get page Info by slug 
+	* @param slug varchar NOT NULL
+	* @return json array
+	*/
+
+	function get_page_info($slug=''){
+		$foundRecord = false;
+		$user = array();
+
+		$content = $this->Content->find('first',array('conditions'=>array(
+			'Content.page_slug'=>$slug,
+			'Content.status'=>'Publish',
+		)));
+
+		if(!empty($content)){
+			$msg = self::$errors['listFound'];
+			$foundRecord = true;
+			$content = $content['Content'];
+		}else{
+			$msg = self::$errors['listNotFound'];
+		}
+
+		$response = array(
+			'isSuccess'=>$foundRecord,
+			'msg'=>$msg,
+			'data'=>$content
+		);
+
+		echo json_encode($response);
+	}
+
+	/*
+	* Function for get friends by User Id 
+	* @param userId INT NOT NULL
+	* @return json array
+	*/
+
+	function get_friends($userId = ''){
+		$foundRecord = false;
+		$friends = array();
+		$msg = '';
+		$userId = (isset($userId))?$userId:$this->Auth->user('user_id');
+
+		if(!empty($userId)){
+			$this->UserFriend->unbindModel(array('belongsTo'=>array('User')));
+			$friends = $this->UserFriend->find('all', array('fields'=>array('Friend.*'),'conditions'=>array('UserFriend.user_id'=>$userId)));
+
+			$newList = array();
+			foreach ($friends as $key => $friend):
+				$newList[] = $friend['Friend'];
+			endforeach;
+
+			$msg = self::$errors['listFound'];
+			$foundRecord = true;
+			$friends = $newList;
+		}else{
+			$msg = self::$errors['listNotFound'];
+		}
+
+		$response = array(
+			'isSuccess'=>$foundRecord,
+			'msg'=>$msg,
+			'data'=>$friends
+		);
+
+		echo json_encode($response);
+	}
+
+	/*
+	* Function for add user as a friends by User Id
+	* @param userId INT NOT NULL
+	* @param friends Array NOT NULL
+	* @return json array
+	*/
+
+	function add_friend(){
+		$isAdded = false;
+		$resData = array();
+		$msg = '';
+
+		if (!empty($this->request->data) && $this->request->is('post')) {
+			$friendIds = $this->request->data['friendIds'];
+			$userId = $this->Auth->user('user_id');
+			$userFriends = array();
+			foreach ($friendIds as $friendId):
+				$userFriends[]['UserFriend'] = array(
+					'user_id' => $userId,
+					'friend_user_id' => $friendId,
+					'created_at' => date('Y-m-d H:i:s'),
+				);
+			endforeach;
+		
+			$this->UserFriend->create();
+			if($this->UserFriend->saveAll($userFriends)){
+					$msg =  self::$errors['friendAddSuccess'];
+					$isAdded = true;					
+					$resData = $friendIds;
+			}else{
+				$msg =  self::$errors['operationFail'];
+			}
+			
+		}
+
+		$response = array(
+			'isSuccess'=>$isAdded,
+			'msg'=>$msg,
+			'data'=>$resData
 		);
 
 		echo json_encode($response);
