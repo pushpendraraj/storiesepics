@@ -26,7 +26,7 @@ class WebserviceController extends AppController {
 		'operationFail' => 'Operation fail, please try again later.',
 		'emptyFriendList' => 'Empty friends list',
 		'emptyTagList' => 'Empty tag list',
-		'actionNotFound' =>'Sorry action not found.',
+		'actionNotFound' =>'Action not found.',
 		'forgotSuccess' => 'A new password has been sent to your register email address.'
 	);
 
@@ -60,22 +60,22 @@ class WebserviceController extends AppController {
     
     function index(){
     	$actionName = $this->request->query['action'];
-
-    	$postData = json_decode(file_get_contents("php://input"), TRUE);
-    	$reqData = $postData['data'];
-    	$this->request->data = $reqData;
-
-    	if($actionName){
-    		$this->$actionName();
+		
+		if(method_exists($this, $actionName)){
+			$postData = json_decode(file_get_contents("php://input"), TRUE);
+	    	$reqData = $postData['data'];
+	    	$this->request->data = $reqData;
+	    	$this->$actionName();
     		return false;
-    	}else{
-    		$response = array(
-				'isSuccess'=>false,
-				'msg'=>slef::errors['actionNotFound'],
+		}else{
+			$response = array(
+				'status'=>0,
+				'code'=>204,
+				'msg'=>self::$errors['actionNotFound'],
 				'data'=>array()
 			);
-			return true;
-    	}
+		}
+
 		echo json_encode($response);
     }
 
