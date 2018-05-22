@@ -43,7 +43,14 @@ class WebserviceController extends AppController {
 		404=>'Not Found',
 		406=>'Not Acceptable',
 		500=>'Server Error',
-		204=>'Invalid Request Method'
+		204=>'Invalid Request Method',
+		100=>'Action Not Found',
+		101=>'Invalid Email Address',
+		102=>'Invalid Password',
+		103=>'Invalid Email Id Aur Password',
+		104=>'Full Name Should Not Be Empty',
+		105=>'Operation Failed, Please Try Again',
+		106=>'User Not Logged In, Login First'
 	);
 
 	function beforeFilter(){
@@ -70,8 +77,7 @@ class WebserviceController extends AppController {
 		}else{
 			$response = array(
 				'status'=>0,
-				'code'=>204,
-				'msg'=>self::$errors['actionNotFound'],
+				'code'=>100,
 				'data'=>array()
 			);
 		}
@@ -79,17 +85,20 @@ class WebserviceController extends AppController {
 		echo json_encode($response);
     }
 
+    /*
+	* Function for get users
+	* @return json array
+	*/
+
 	function get_users() {
 		$foundRecord = $resCode = 0;
 		$users = array();
-
 		$users = $this->User->find('all',array('conditions'=>array(
 			'User.user_status'=>1,
 			'User.user_role_id'=>3
 		)));
 
 		if(!empty($users)){
-			$msg = self::$errors['listFound'];
 			$foundRecord = 1;
 			$resCode = 200;
 			$newList = array();
@@ -98,14 +107,13 @@ class WebserviceController extends AppController {
 			endforeach;
 			$users = $newList;
 		}else{
-			$resCode = 210;
-			$msg = self::$errors['listNotFound'];
+			$foundRecord = 1;
+			$resCode = 200;
 		}
 
 		$response = array(
 			'status'=>$foundRecord,
 			'code'=>$resCode,
-			'msg'=>$msg,
 			'data'=>$users
 		);
 
@@ -121,6 +129,7 @@ class WebserviceController extends AppController {
 
 	function login(){
 		$isLogin = $resCode = 0;
+		$resData = array();
 		if(!empty($this->request->data) && $this->request->is('post')){
 			$this->request->data = array(
 				'Login'=>$this->request->data
@@ -129,15 +138,9 @@ class WebserviceController extends AppController {
 			$this->Login->set($this->request->data);
 			
 			if(!$this->Login->validates(array('fieldList'=>array('email')))){
-				$errors = $this->Login->validationErrors;
-				$msg = $errors['email'][0];
-				$resCode = 203;
-				$resData = array();
+				$resCode = 101;
 			}else if(!$this->Login->validates(array('fieldList'=>array('password')))){
-				$errors = $this->Login->validationErrors;
-				$msg = $errors['password'][0];
-				$resCode = 203;
-				$resData = array();
+				$resCode = 102;
 			}else if($this->Auth->login()){ 
 			 	/*--update access logs--*/
 			 	$this->User->validation=null;
@@ -154,23 +157,17 @@ class WebserviceController extends AppController {
 			 			 	 
 				$isLogin = 1;
 				$resCode = 200;
-				$msg = self::$errors['loginSuccess']; 
 				$resData = $this->Auth->user();
 			}else{
-				$msg = self::$errors['invalidEmailPassword'];
-				$resCode = 203;
-				$resData = array();
+				$resCode = 103;
 			}
 		}else{
-			$msg = self::$errors['emptyEmailPassword'];
-			$resData = array();
-			$resCode = 201;
+			$resCode = 204;
 		}
 
 		$response = array(
 			'status'=>$isLogin,
 			'code'=>$resCode,
-			'msg'=>$msg,
 			'data'=>$resData
 		);
 
@@ -197,9 +194,7 @@ class WebserviceController extends AppController {
 
 	function register(){
 		$isRegister = $resCode = 0;
-		$msg = '';
 		$resData = array();
-
 		if (!empty($this->request->data) && $this->request->is('post')) {
 			$this->request->data = array(
 				'User'=>$this->request->data
@@ -207,44 +202,31 @@ class WebserviceController extends AppController {
 
 			$this->User->set($this->request->data);
 			if(!$this->User->validates(array('fieldList'=>array('full_name')))){
-				$errors = $this->User->validationErrors;
-				$msg = $errors['full_name'][0];
-				$resData = array();
-				$resCode = 203;
+				$resCode = 104;
 			}else if(!$this->User->validates(array('fieldList'=>array('email')))){
-				$errors = $this->User->validationErrors;
-				$msg = $errors['email'][0];
-				$resData = array();
-				$resCode = 203;
+				$resCode = 101;
 			}else if(!$this->User->validates(array('fieldList'=>array('password')))){
-				$errors = $this->User->validationErrors;
-				$msg = $errors['password'][0];
-				$resData = array();
-				$resCode = 203;
+				$resCode = 102;
 			}else{
 				$this->User->create();
 				$this->request->data['User']['user_added_date'] = date('Y-m-d H:i:s');
 				$pass=$this->request->data['User']['password'];
 				$this->request->data['User']['password']=AuthComponent::password($pass);
 				if($userData = $this->User->save($this->request->data)) {
-					$msg =  self::$errors['registerSuccess'];
 					$isRegister = 1;
 					$resCode = 200;
 					$resData = $userData['User'];
 				} else {
-					$msg =  self::$errors['registerFail'];
-					$resCode = 203;
+					$resCode = 105;
 				}
 			}
 		}else{
-			$resCode = 201;
-			$msg = self::$errors['emptyUser'];
+			$resCode = 204;
 		}
 
 		$response = array(
 			'status'=>$isRegister,
 			'code'=>$resCode,
-			'msg'=>$msg,
 			'data'=>$resData
 		);
 
@@ -334,24 +316,20 @@ class WebserviceController extends AppController {
 	/*
 	* Function for update a user info
 	* @param full_name Varchar NOT NULL
-	* @param email Varchar NOT NULL
-	* @param password Varchar NOT NULL
-	* @param phone Varchar NULL
-	* @param location Varchar NULL
-	* @param job_title Varchar NULL
-	* @param company Varchar NULL
-	* @param industries Varchar NULL
-	* @param website Varchar NULL
-	* @param user_status Varchar NOT NULL // 0/1
-	* @param user_description Varchar NULL
-	* @param user_note Varchar NULL
-	* @param term_and_condition Varchar NOT NULL // 0/1
+	* @param password Varchar OPTIONAL
+	* @param phone Varchar OPTIONAL
+	* @param location Varchar OPTIONAL
+	* @param job_title Varchar OPTIONAL
+	* @param company Varchar OPTIONAL
+	* @param industries Varchar OPTIONAL
+	* @param website Varchar OPTIONAL
+	* @param user_description Varchar OPTIONAL
+	* @param user_note Varchar OPTIONAL
 	* @return json array
 	*/
 
 	function update_profile(){
-		$isUpdate = false;
-		$msg = '';
+		$isUpdate = $resCode = 0;
 		$resData = array();
 
 		if (!empty($this->request->data) && $this->request->is('post')) {
@@ -372,29 +350,30 @@ class WebserviceController extends AppController {
 			
 			$this->User->set($this->request->data);
 			if(!$this->User->validates(array('fieldList'=>array('full_name')))){
-				$errors = $this->User->validationErrors;
-				$msg = $errors['full_name'][0];
-				$resData = array();
+				$resCode = 104;
 			}else{
 				$this->request->data['User']['user_modified_date'] = date('Y-m-d H:i:s');
-				$this->User->id = $this->Auth->user('user_id');
-
-				if($userData = $this->User->save($this->request->data)) {
-					$msg =  self::$errors['updateSuccess'];
-					$isUpdate = true;
-					$resData = $userData['User'];
-				} else {
-					$msg =  self::$errors['updateFail'];
-					$isUpdate = false;
+				$userId = $this->Auth->user('user_id');
+				if(empty($userId)){
+					$resCode = 106;
+				}else{
+					$this->User->id = $userId;
+					if($userData = $this->User->save($this->request->data)) {
+						$isUpdate = 1;
+						$resCode = 200;
+						$resData = $userData['User'];
+					} else {
+						$resCode = 105;
+					}
 				}
 			}
 		}else{
-			$msg = self::$errors['emptyUser'];
+			$resCode = 204;
 		}
 
 		$response = array(
-			'isSuccess'=>$isUpdate,
-			'msg'=>$msg,
+			'status'=>$isUpdate,
+			'code'=>$resCode,
 			'data'=>$resData
 		);
 
@@ -408,8 +387,7 @@ class WebserviceController extends AppController {
 	*/
 
 	function update_profile_picture(){
-		$isUpdate = false;
-		$msg = '';
+		$isUpdate = $resCode = 0;
 		$resData = array();
 		if (!empty($this->request->data) && $this->request->is('post')) {
 			$userId=$this->Auth->user('user_id');
@@ -424,20 +402,19 @@ class WebserviceController extends AppController {
 			$this->request->data['User']['profile_pic'] = $filename;
 			$this->User->id = $userId;
 			if($userData = $this->User->save($this->request->data)){
-				$msg =  self::$errors['profileImgUpdateSuccess'];
-				$isUpdate = true;
+				$resCode = 200;
+				$isUpdate = 1;
 				$resData = '/img/admin/user/thumb/'.$filename;
 			}else{
-				$msg =  self::$errors['profileImgUpdateSuccess'];
-				$isUpdate = false;
+				$resCode = 105;
 			}
 		}else{
-			$msg = self::$errors['emptyUser'];
+			$resCode = 204;
 		}
 
 		$response = array(
-			'isSuccess'=>$isUpdate,
-			'msg'=>$msg,
+			'status'=>$isUpdate,
+			'code'=>$resCode,
 			'data'=>$resData
 		);
 

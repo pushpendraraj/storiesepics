@@ -23,7 +23,7 @@ class Login extends AppModel {
 
 
 	function verifyLogin($reqData){
-		$result=$this->findByEmailAndPasswordAndUserStatus($reqData['Login']['email'],md5($reqData['Login']['password']),'Active');
+		$result=$this->findByEmailAndPasswordAndUserStatus($reqData['Login']['email'],md5($reqData['Login']['password']),1);
 		if($result){
 			return $result;
 		}else{
