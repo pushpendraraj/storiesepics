@@ -50,7 +50,8 @@ class WebserviceController extends AppController {
 		103=>'Invalid Email Id Aur Password',
 		104=>'Full Name Should Not Be Empty',
 		105=>'Operation Failed, Please Try Again',
-		106=>'User Not Logged In, Login First'
+		106=>'User Not Logged In, Login First',
+		107=>'Invalid Image Data',
 	);
 
 	function beforeFilter(){
@@ -392,22 +393,28 @@ class WebserviceController extends AppController {
 		if (!empty($this->request->data) && $this->request->is('post')) {
 			$userId=$this->Auth->user('user_id');
 			$imageData = $this->request->data['profile_pic'];
-			unset($this->request->data['profile_pic']);
-			list($type, $imageData) = explode(';', $imageData);
-			list(, $imageData)      = explode(',', $imageData);
-			
-			$imageData = base64_decode($imageData);
-			$filename = time().'.png';
-			file_put_contents(getcwd().'/img/admin/user/thumb/'.$filename, $imageData);
-			$this->request->data['User']['profile_pic'] = $filename;
-			$this->User->id = $userId;
-			if($userData = $this->User->save($this->request->data)){
-				$resCode = 200;
-				$isUpdate = 1;
-				$resData = '/img/admin/user/thumb/'.$filename;
+			if(!preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $imageData)){
+				unset($this->request->data['profile_pic']);
+				list($type, $imageData) = explode(';', $imageData);
+				list(, $imageData)      = explode(',', $imageData);
+				
+				$imageData = base64_decode($imageData);
+				$filename = time().'.png';
+				file_put_contents(getcwd().'/img/admin/user/thumb/'.$filename, $imageData);
+				$this->request->data['User']['profile_pic'] = $filename;
+				$this->User->id = $userId;
+				if($userData = $this->User->save($this->request->data)){
+					$resCode = 200;
+					$isUpdate = 1;
+					$resData = '/img/admin/user/thumb/'.$filename;
+				}else{
+					$resCode = 105;
+				}
 			}else{
-				$resCode = 105;
+				$resCode = 107;
 			}
+		
+			
 		}else{
 			$resCode = 204;
 		}
